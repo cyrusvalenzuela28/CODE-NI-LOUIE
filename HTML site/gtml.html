@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DUO BREW POS</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/751/751621.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<style>
+    :root {
+        --coffee-dark: #3E2723;
+        --coffee-medium: #5D4037;
+        --coffee-light: #8D6E63;
+        --cream: #FFF8E1;
+        --accent: #D7CCC8;
+        --text-dark: #212121;
+    }
+
+    body {
+        background-color: #f5f5f5;
+        font-family: 'Lato', sans-serif;
+        overflow: hidden;
+    }
+
+    h1, h2, h3, .brand-font {
+        font-family: 'Playfair Display', serif;
+    }
+
+    /* Custom Scrollbar */
+    .hide-scrollbar {
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--coffee-light) transparent;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar-thumb {
+        background-color: var(--coffee-light);
+        border-radius: 20px;
+    }
+
+    /* Header Styling */
+    .top-bar {
+        background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        z-index: 1000;
+    }
+
+    .brand-text {
+        color: var(--cream);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        letter-spacing: 2px;
+    }
+
+    /* Category Buttons */
+    .category-btn {
+        min-width: 140px;
+        height: 80px;
+        background: white;
+        border: 2px solid var(--coffee-light);
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--coffee-dark);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .category-btn:hover, .category-btn.active {
+        background: var(--coffee-dark);
+        color: var(--cream);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(62, 39, 35, 0.3);
+    }
+
+    /* Product Cards */
+    .product-card {
+        width: 220px;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        border: 1px solid #e0e0e0;
+        position: relative;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        border-color: var(--coffee-medium);
+    }
+
+    .product-img-container {
+        height: 160px;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-img {
+        transform: scale(1.1);
+    }
+
+    .product-info {
+        padding: 15px;
+        background: white;
+    }
+
+    .price-tag {
+        color: var(--coffee-dark);
+        font-weight: 800;
+        font-size: 1.1rem;
+    }
+
+    /* Receipt Panel */
+    .receipt-panel {
+        background: white;
+        border-left: 1px solid #e0e0e0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .receipt-header {
+        background: var(--coffee-dark);
+        color: var(--cream);
+        padding: 20px;
+        text-align: center;
+        border-radius: 12px 12px 0 0;
+        margin: -1rem -1rem 1rem -1rem;
+    }
+
+    .receipt-item {
+        padding: 10px;
+        border-bottom: 1px dashed #e0e0e0;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .receipt-footer {
+        margin-top: auto;
+        border-top: 2px solid var(--coffee-dark);
+        padding-top: 15px;
+    }
+
+    .total-section {
+        background: var(--cream);
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+    }
+
+    /* Buttons */
+    .btn-coffee {
+        background: var(--coffee-dark);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 700;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+    .btn-coffee:hover {
+        background: var(--coffee-medium);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(62, 39, 35, 0.3);
+        color: white;
+    }
+
+    .btn-clear {
+        background: transparent;
+        color: #d32f2f;
+        border: 2px solid #d32f2f;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-clear:hover {
+        background: #d32f2f;
+        color: white;
+    }
+
+    .btn-remove {
+        color: #d32f2f;
+        cursor: pointer;
+        font-size: 0.8rem;
+        margin-left: 5px;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+        background: var(--coffee-dark);
+        color: white;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .checkout-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .badge-category {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(62, 39, 35, 0.9);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .product-card {
+            width: 100%;
+        }
+        .category-btn {
+            min-width: 120px;
+            height: 60px;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Quantity Controls in Receipt */
+    .qty-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .qty-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1px solid var(--coffee-light);
+        background: white;
+        color: var(--coffee-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s;
+    }
+    
+    .qty-btn:hover {
+        background: var(--coffee-dark);
+        color: white;
+    }
+</style>
+
+<body>
+    <div class="container-fluid vh-100 d-flex flex-column">
+        <!-- Header -->
+        <div class="row top-bar py-3 align-items-center">
+            <div class="col-2 d-flex justify-content-center">
+                <img src="https://cdn-icons-png.flaticon.com/512/751/751621.png" alt="Logo" class="img-fluid" style="max-height: 50px; filter: brightness(0) invert(1);">
+            </div>
+            <div class="col-10 d-flex align-items-center">
+                <h1 class="brand-text display-6 mb-0"><b>DUO BREW</b></h1>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row flex-grow-1 overflow-hidden" style="padding-top: 20px;">
+            <!-- Left Side - Products -->
+            <div class="col-12 col-lg-9 d-flex flex-column h-100">
+                <!-- Categories -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm rounded-4 p-3">
+                            <div class="d-flex gap-3 overflow-auto hide-scrollbar" id="categories">
+                                <!-- Categories injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="row flex-grow-1 overflow-hidden">
+                    <div class="col-12 h-100">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 overflow-hidden">
+                            <div class="d-flex flex-wrap gap-3 justify-content-start align-content-start overflow-auto hide-scrollbar h-100" id="maincontainer">
+                                <!-- Products injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Receipt -->
+            <div class="col-12 col-lg-3 h-100 ps-lg-3 mt-3 mt-lg-0">
+                <div class="card receipt-panel h-100 shadow-lg rounded-4 p-3">
+                    <div class="receipt-header">
+                        <h4 class="mb-0 brand-font">Current Order</h4>
+                        <small id="orderDate"></small>
+                    </div>
+                    
+                    <div class="flex-grow-1 overflow-auto hide-scrollbar" id="receipt">
+                        <!-- Receipt items injected here -->
+                        <div class="text-center text-muted mt-5">
+                            <i class="fas fa-coffee fa-3x mb-3"></i>
+                            <p>Your cart is empty</p>
+                        </div>
+                    </div>
+
+                    <div class="receipt-footer">
+                        <div class="total-section">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal</span>
+                                <span id="subtotalValue">₱0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 text-muted">
+                                <small>Tax (12%)</small>
+                                <small id="taxValue">₱0.00</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <h5 class="mb-0"><b>TOTAL</b></h5>
+                                <h4 class="mb-0 text-danger" id="totalValue"><b>₱0.00</b></h4>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button onclick="openCheckout()" class="btn btn-coffee btn-lg" id="checkoutBtn" disabled>
+                                <i class="fas fa-credit-card me-2"></i>Checkout
+                            </button>
+                            <button onclick="clearReceipt()" class="btn btn-clear">
+                                <i class="fas fa-trash-alt me-2"></i>Clear Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title brand-font"><i class="fas fa-receipt me-2"></i>Checkout</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="checkoutSummary" class="mb-4">
+                        <!-- Summary injected here -->
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Payment Method</label>
+                        <div class="d-flex gap-2 mb-3">
+                            <button class="btn btn-outline-secondary flex-fill payment-method active" onclick="selectPayment(this, 'cash')">
+                                <i class="fas fa-money-bill-wave"></i> Cash
+                            </button>
+                            <button class="btn btn-outline-secondary flex-fill payment-method" onclick="selectPayment(this, 'card')">
+                                <i class="fas fa-credit-card"></i> Card
+                            </button>
+                            <button class="btn btn-outline-secondary flex-fill payment-method" onclick="selectPayment(this, 'gcash')">
+                                <i class="fas fa-mobile-alt"></i> GCash
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="cashInput">
+                        <label class="form-label fw-bold">Cash Received</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" class="form-control" id="cashAmount" placeholder="0.00" oninput="calculateChange()">
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info" id="changeDisplay" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Change:</span>
+                            <h4 class="mb-0" id="changeAmount">₱0.00</h4>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button onclick="processPayment()" class="btn btn-coffee btn-lg" id="confirmPaymentBtn" disabled>
+                            Confirm Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="mb-3">Payment Successful!</h4>
+                <p class="text-muted mb-4">Thank you for choosing DUO BREW</p>
+                <button onclick="closeSuccessModal()" class="btn btn-coffee">New Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        // Coffee Shop Data
+        var products = [
+            {
+                category: "Hot Coffee",
+                items: [
+                    { name: "Espresso", price: 120, image: "https://images.unsplash.com/photo-1510707577719-ae7c14805e3a?w=400", description: "Rich and bold single shot" },
+                    { name: "Americano", price: 140, image: "https://images.unsplash.com/photo-1551030173-122aabc4489c?w=400", description: "Espresso with hot water" },
+                    { name: "Cappuccino", price: 160, image: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400", description: "Equal parts espresso, steamed milk, foam" },
+                    { name: "Latte", price: 160, image: "https://images.unsplash.com/photo-1570968992193-d6ea066f0b69?w=400", description: "Espresso with steamed milk" },
+                    { name: "Mocha", price: 180, image: "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=400", description: "Chocolate espresso with milk" },
+                    { name: "Macchiato", price: 150, image: "https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=400", description: "Espresso with milk foam" }
+                ]
+            },
+            {
+                category: "Iced Coffee",
+                items: [
+                    { name: "Iced Americano", price: 150, image: "https://images.unsplash.com/photo-1517701604599-bb29b5dd7359?w=400", description: "Chilled espresso with water" },
+                    { name: "Iced Latte", price: 170, image: "https://images.unsplash.com/photo-1517959105821-eaf2591984ca?w=400", description: "Espresso with cold milk and ice" },
+                    { name: "Iced Mocha", price: 190, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400", description: "Chocolate espresso with cold milk" },
+                    { name: "Cold Brew", price: 180, image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400", description: "Steeped for 24 hours" },
+                    { name: "Frappuccino", price: 200, image: "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=400", description: "Blended coffee with cream" }
+                ]
+            },
+            {
+                category: "Tea & Others",
+                items: [
+                    { name: "Matcha Latte", price: 180, image: "https://images.unsplash.com/photo-1515823664972-6d66e79bc394?w=400", description: "Premium Japanese matcha" },
+                    { name: "Chai Latte", price: 170, image: "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400", description: "Spiced tea with steamed milk" },
+                    { name: "Hot Chocolate", price: 160, image: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=400", description: "Rich Belgian chocolate" },
+                    { name: "Lemon Tea", price: 130, image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", description: "Fresh brewed with lemon" }
+                ]
+            },
+            {
+                category: "Pastries",
+                items: [
+                    { name: "Croissant", price: 120, image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400", description: "Buttery French pastry" },
+                    { name: "Chocolate Muffin", price: 140, image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=400", description: "Double chocolate chip" },
+                    { name: "Cinnamon Roll", price: 150, image: "https://images.unsplash.com/photo-1509365465985-25d11c17e812?w=400", description: "With cream cheese frosting" },
+                    { name: "Cheesecake", price: 180, image: "https://images.unsplash.com/photo-1524351199678-941a58a3df26?w=400", description: "New York style" },
+                    { name: "Chocolate Cake", price: 200, image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400", description: "Decadent layer cake" }
+                ]
+            }
+        ];
+
+        var cart = [];
+        var currentCategory = 0;
+        var paymentMethod = 'cash';
+        const TAX_RATE = 0.12;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCategories();
+            loadProducts(0);
+            updateDate();
+        });
+
+        function updateDate() {
+            const now = new Date();
+            document.getElementById('orderDate').textContent = now.toLocaleDateString('en-US', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function loadCategories() {
+            var container = document.getElementById("categories");
+            container.innerHTML = "";
+            
+            products.forEach(function(cat, index) {
+                var btn = document.createElement('div');
+                btn.className = 'category-btn ' + (index === 0 ? 'active' : '');
+                btn.innerHTML = `<span>${cat.category}</span>`;
+                btn.onclick = function() {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    loadProducts(index);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function loadProducts(categoryIndex) {
+            currentCategory = categoryIndex;
+            var container = document.getElementById("maincontainer");
+            container.innerHTML = "";
+            
+            products[categoryIndex].items.forEach(function(item, index) {
+                var card = document.createElement('div');
+                card.className = 'product-card fade-in';
+                card.style.animationDelay = (index * 0.05) + 's';
+                card.onclick = function() { addToCart(item); };
+                
+                card.innerHTML = `
+                    <div class="product-img-container">
+                        <img src="${item.image}" alt="${item.name}" class="product-img">
+                        <span class="badge-category">${products[categoryIndex].category}</span>
+                    </div>
+                    <div class="product-info">
+                        <h6 class="fw-bold mb-1">${item.name}</h6>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.8rem;">${item.description}</small>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price-tag">₱${item.price.toFixed(2)}</span>
+                            <button class="btn btn-sm btn-outline-dark rounded-circle" style="width: 32px; height: 32px; padding: 0;">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addToCart(item) {
+            var existing = cart.find(i => i.name === item.name);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({
+                    name: item.name,
+                    price: item.price,
+                    qty: 1
+                });
+            }
+            updateReceipt();
+            
+            // Visual feedback
+            var btn = event.currentTarget;
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => btn.style.transform = '', 100);
+        }
+
+        function updateReceipt() {
+            var container = document.getElementById("receipt");
+            var subtotal = 0;
+            
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted mt-5">
+                        <i class="fas fa-mug-hot fa-3x mb-3 opacity-25"></i>
+                        <p>Your cart is empty</p>
+                        <small>Select items to start order</small>
+                    </div>
+                `;
+                document.getElementById('checkoutBtn').disabled = true;
+            } else {
+                container.innerHTML = "";
+                cart.forEach(function(item, index) {
+                    subtotal += item.price * item.qty;
+                    var div = document.createElement('div');
+                    div.className = 'receipt-item';
+                    div.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">${item.name}</div>
+                                <div class="qty-control mt-1">
+                                    <span class="qty-btn" onclick="updateQty(${index}, -1)">-</span>
+                                    <span class="mx-2">${item.qty}x</span>
+                                    <span class="qty-btn" onclick="updateQty(${index}, 1)">+</span>
+                                    <span class="btn-remove ms-2" onclick="removeItem(${index})">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div>₱${(item.price * item.qty).toFixed(2)}</div>
+                                <small class="text-muted">₱${item.price.toFixed(2)} each</small>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+                document.getElementById('checkoutBtn').disabled = false;
+            }
+            
+            var tax = subtotal * TAX_RATE;
+            var total = subtotal + tax;
+            
+            document.getElementById('subtotalValue').textContent = '₱' + subtotal.toFixed(2);
+            document.getElementById('taxValue').textContent = '₱' + tax.toFixed(2);
+            document.getElementById('totalValue').innerHTML = '<b>₱' + total.toFixed(2) + '</b>';
+        }
+
+        function updateQty(index, change) {
+            cart[index].qty += change;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            updateReceipt();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateReceipt();
+        }
+
+        function clearReceipt() {
+            if (cart.length > 0 && !confirm('Are you sure you want to clear the order?')) return;
+            cart = [];
+            updateReceipt();
+        }
+
+        // Checkout Functions
+        function openCheckout() {
+            var modal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+            var summary = document.getElementById('checkoutSummary');
+            var subtotal = 0;
+            
+            var html = '<h6 class="fw-bold mb-3">Order Summary</h6>';
+            cart.forEach(item => {
+                subtotal += item.price * item.qty;
+                html += `
+                    <div class="checkout-item">
+                        <span>${item.qty}x ${item.name}</span>
+                        <span>₱${(item.price * item.qty).toFixed(2)}</span>
+                    </div>
+                `;
+            });
+            
+            var tax = subtotal * TAX_RATE;
+            var total = subtotal + tax;
+            
+            html += `
+                <div class="checkout-item text-muted">
+                    <small>Subtotal</small>
+                    <small>₱${subtotal.toFixed(2)}</small>
+                </div>
+                <div class="checkout-item text-muted">
+                    <small>Tax (12%)</small>
+                    <small>₱${tax.toFixed(2)}</small>
+                </div>
+                <div class="checkout-item fw-bold fs-5 mt-2 pt-2 border-top">
+                    <span>Total Amount</span>
+                    <span>₱${total.toFixed(2)}</span>
+                </div>
+            `;
+            
+            summary.innerHTML = html;
+            document.getElementById('cashAmount').value = '';
+            document.getElementById('changeDisplay').style.display = 'none';
+            document.getElementById('confirmPaymentBtn').disabled = true;
+            
+            modal.show();
+        }
+
+        function selectPayment(btn, method) {
+            paymentMethod = method;
+            document.querySelectorAll('.payment-method').forEach(b => b.classList.remove('active', 'btn-dark'));
+            document.querySelectorAll('.payment-method').forEach(b => b.classList.add('btn-outline-secondary'));
+            
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('active', 'btn-dark');
+            
+            if (method === 'cash') {
+                document.getElementById('cashInput').style.display = 'block';
+                document.getElementById('changeDisplay').style.display = 'none';
+                checkCashInput();
+            } else {
+                document.getElementById('cashInput').style.display = 'none';
+                document.getElementById('changeDisplay').style.display = 'none';
+                document.getElementById('confirmPaymentBtn').disabled = false;
+            }
+        }
+
+        function calculateChange() {
+            var cash = parseFloat(document.getElementById('cashAmount').value) || 0;
+            var subtotal = 0;
+            cart.forEach(item => subtotal += item.price * item.qty);
+            var total = subtotal + (subtotal * TAX_RATE);
+            var change = cash - total;
+            
+            var changeDisplay = document.getElementById('changeDisplay');
+            var confirmBtn = document.getElementById('confirmPaymentBtn');
+            
+            if (cash >= total) {
+                changeDisplay.style.display = 'block';
+                changeDisplay.className = 'alert alert-success';
+                document.getElementById('changeAmount').textContent = '₱' + change.toFixed(2);
+                confirmBtn.disabled = false;
+            } else {
+                changeDisplay.style.display = 'block';
+                changeDisplay.className = 'alert alert-danger';
+                document.getElementById('changeAmount').textContent = 'Insufficient Amount';
+                confirmBtn.disabled = true;
+            }
+        }
+
+        function checkCashInput() {
+            var cash = parseFloat(document.getElementById('cashAmount').value) || 0;
+            var subtotal = 0;
+            cart.forEach(item => subtotal += item.price * item.qty);
+            var total = subtotal + (subtotal * TAX_RATE);
+            document.getElementById('confirmPaymentBtn').disabled = cash < total;
+        }
+
+        function processPayment() {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
+            modal.hide();
+            
+            setTimeout(() => {
+                var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+            }, 300);
+        }
+
+        function closeSuccessModal() {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('successModal'));
+            modal.hide();
+            cart = [];
+            updateReceipt();
+        }
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+</body>
+
+</html>
