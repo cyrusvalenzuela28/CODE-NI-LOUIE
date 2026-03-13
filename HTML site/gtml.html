@@ -370,13 +370,23 @@
     .payment-card { background: #e3f2fd; color: #1565c0; }
     .payment-gcash { background: #fff3e0; color: #ef6c00; }
 
-    /* Print Receipt Styles */
+    /* Print Receipt Styles - Preview Mode */
+    .receipt-preview-container {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 12px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
     .print-receipt {
         background: white;
         padding: 30px;
         max-width: 300px;
         margin: 0 auto;
         font-family: 'Courier New', monospace;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 8px;
     }
 
     .print-header {
@@ -406,18 +416,24 @@
         font-size: 0.8rem;
     }
 
+    /* Actual Print Styles */
     @media print {
         body * {
             visibility: hidden;
         }
-        #printReceiptContent, #printReceiptContent * {
+        #printArea, #printArea * {
             visibility: visible;
         }
-        #printReceiptContent {
+        #printArea {
             position: absolute;
             left: 50%;
             top: 0;
             transform: translateX(-50%);
+            background: white;
+            padding: 20px;
+        }
+        .no-print {
+            display: none !important;
         }
     }
 
@@ -577,20 +593,40 @@
         </div>
     </div>
 
-    <!-- Success Modal -->
+    <!-- Success Modal with Receipt Preview -->
     <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content text-center p-4">
-                <div class="mb-3">
-                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title brand-font"><i class="fas fa-check-circle me-2"></i>Payment Successful!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <h4 class="mb-3">Payment Successful!</h4>
-                <p class="text-muted mb-4" id="successReceiptId"></p>
-                <div class="d-grid gap-2">
-                    <button onclick="printCurrentReceipt()" class="btn btn-outline-secondary">
-                        <i class="fas fa-print me-2"></i>Print Receipt
-                    </button>
-                    <button onclick="closeSuccessModal()" class="btn btn-coffee">New Order</button>
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <!-- Left: Receipt Preview -->
+                        <div class="col-md-7">
+                            <h6 class="fw-bold mb-3">Receipt Preview</h6>
+                            <div class="receipt-preview-container" id="successReceiptPreview">
+                                <!-- Receipt preview injected here -->
+                            </div>
+                        </div>
+                        <!-- Right: Actions -->
+                        <div class="col-md-5 d-flex flex-column justify-content-center">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                                <h5 class="mt-3 mb-1">Thank you!</h5>
+                                <p class="text-muted" id="successReceiptId"></p>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button onclick="printCurrentReceipt()" class="btn btn-coffee btn-lg">
+                                    <i class="fas fa-print me-2"></i>Print Receipt
+                                </button>
+                                <button onclick="closeSuccessModal()" class="btn btn-outline-secondary">
+                                    <i class="fas fa-shopping-bag me-2"></i>New Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -686,28 +722,39 @@
         </div>
     </div>
 
-    <!-- View Receipt Modal -->
+    <!-- View Receipt Modal with Preview -->
     <div class="modal fade" id="viewReceiptModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title brand-font">Receipt Details</h5>
+                    <h5 class="modal-title brand-font"><i class="fas fa-receipt me-2"></i>Receipt Details</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-0">
-                    <div id="printReceiptContent">
-                        <!-- Receipt content for printing -->
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="receipt-preview-container" id="viewReceiptPreview">
+                                <!-- Receipt preview injected here -->
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex flex-column justify-content-center">
+                            <div class="d-grid gap-2">
+                                <button onclick="printSpecificReceipt()" class="btn btn-coffee btn-lg">
+                                    <i class="fas fa-print me-2"></i>Print Receipt
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Close
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button onclick="printSpecificReceipt()" class="btn btn-coffee">
-                        <i class="fas fa-print me-2"></i>Print
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Hidden Print Area -->
+    <div id="printArea" style="display: none;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1061,9 +1108,10 @@
             var modal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
             modal.hide();
 
-            // Show success modal
+            // Show success modal with receipt preview
             setTimeout(() => {
                 document.getElementById('successReceiptId').textContent = 'Receipt: ' + receiptId;
+                generateReceiptPreview(receiptId, 'successReceiptPreview');
                 var successModal = new bootstrap.Modal(document.getElementById('successModal'));
                 successModal.show();
             }, 300);
@@ -1077,23 +1125,96 @@
             currentReceiptId = null;
         }
 
-        // Print current receipt
+        // Generate receipt preview HTML for display
+        function generateReceiptPreview(receiptId, containerId) {
+            const sale = salesData.find(s => s.id === receiptId);
+            if (!sale) return;
+
+            const date = new Date(sale.date);
+            const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            let itemsHtml = '';
+            sale.items.forEach(item => {
+                itemsHtml += `
+                    <div class="print-item">
+                        <span>${item.qty}x ${item.name}</span>
+                        <span>₱${(item.price * item.qty).toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            const paymentLabels = { cash: 'Cash', card: 'Card', gcash: 'GCash' };
+
+            const html = `
+                <div class="print-receipt">
+                    <div class="print-header">
+                        <h4 style="margin: 0; font-family: 'Playfair Display', serif;">DUO BREW</h4>
+                        <p style="margin: 5px 0; font-size: 0.8rem;">Coffee Shop</p>
+                        <p style="margin: 5px 0; font-size: 0.7rem;">${dateStr} ${timeStr}</p>
+                        <p style="margin: 5px 0; font-size: 0.7rem; font-family: monospace;">${sale.id}</p>
+                    </div>
+
+                    <div style="margin: 15px 0;">
+                        ${itemsHtml}
+                    </div>
+
+                    <div class="print-total">
+                        <div class="print-item">
+                            <span>Subtotal</span>
+                            <span>₱${sale.subtotal.toFixed(2)}</span>
+                        </div>
+                        <div class="print-item">
+                            <span>Tax (12%)</span>
+                            <span>₱${sale.tax.toFixed(2)}</span>
+                        </div>
+                        <div class="print-item" style="font-size: 1.1rem; margin-top: 10px;">
+                            <span>TOTAL</span>
+                            <span>₱${sale.total.toFixed(2)}</span>
+                        </div>
+                        ${sale.paymentMethod === 'cash' ? `
+                        <div class="print-item" style="margin-top: 10px;">
+                            <span>Cash Received</span>
+                            <span>₱${sale.cashReceived.toFixed(2)}</span>
+                        </div>
+                        <div class="print-item">
+                            <span>Change</span>
+                            <span>₱${sale.change.toFixed(2)}</span>
+                        </div>
+                        ` : ''}
+                        <div class="print-item" style="margin-top: 10px;">
+                            <span>Payment Method</span>
+                            <span>${paymentLabels[sale.paymentMethod]}</span>
+                        </div>
+                    </div>
+
+                    <div class="print-footer">
+                        <p>Thank you for choosing DUO BREW!</p>
+                        <p style="font-size: 0.7rem;">This serves as your official receipt</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById(containerId).innerHTML = html;
+        }
+
+        // Print current receipt from success modal
         function printCurrentReceipt() {
             if (currentReceiptId) {
-                viewingReceiptId = currentReceiptId;
                 generatePrintableReceipt(currentReceiptId);
                 setTimeout(() => window.print(), 100);
             }
         }
 
-        // Print specific receipt from sales report
+        // Print specific receipt from view modal
         function printSpecificReceipt() {
             if (viewingReceiptId) {
-                window.print();
+                generatePrintableReceipt(viewingReceiptId);
+                setTimeout(() => window.print(), 100);
             }
         }
 
-        // Generate printable receipt HTML
+        // Generate printable receipt for actual printing
         function generatePrintableReceipt(receiptId) {
             const sale = salesData.find(s => s.id === receiptId);
             if (!sale) return;
@@ -1163,7 +1284,7 @@
                 </div>
             `;
 
-            document.getElementById('printReceiptContent').innerHTML = html;
+            document.getElementById('printArea').innerHTML = html;
         }
 
         // Sales Report Functions
@@ -1264,7 +1385,7 @@
 
         function viewReceipt(receiptId) {
             viewingReceiptId = receiptId;
-            generatePrintableReceipt(receiptId);
+            generateReceiptPreview(receiptId, 'viewReceiptPreview');
             var modal = new bootstrap.Modal(document.getElementById('viewReceiptModal'));
             modal.show();
         }
